@@ -1,0 +1,40 @@
+# Build folders
+/build/
+/out/
+
+# CMake
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/install_manifest.txt
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio generated binaries
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.ipch
+
+# JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# SFML FetchContent / deps build artifacts
+/build/_deps/
+
+# Assets copy target
+/assets/
+
+# macOS
+.DS_Store
