@@ -30,8 +30,15 @@ add_executable(${projectExecutableName} ${PROJECT_SOURCES})
 target_link_libraries(${projectExecutableName} PRIVATE sfml-graphics sfml-window sfml-system)
 
 # Ensure assets are copied to build dir after build - support multi-config generators
-add_custom_command(TARGET ${projectExecutableName} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/assets"
-    "$<TARGET_FILE_DIR:${projectExecutableName}>/assets"
-)
+if (EXISTS "${CMAKE_SOURCE_DIR}/assets")
+  add_custom_command(TARGET ${projectExecutableName} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${projectExecutableName}>/assets"
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying assets -> $<TARGET_FILE_DIR:${projectExecutableName}>/assets"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_SOURCE_DIR}/assets"
+      "$<TARGET_FILE_DIR:${projectExecutableName}>/assets"
+    COMMENT "Copying assets to output directory"
+  )
+else()
+  message(WARNING "Assets directory '${CMAKE_SOURCE_DIR}/assets' not found; skipping copy step.")
+endif()
