@@ -1,0 +1,52 @@
+name: CI - Daily Build
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # daily at 00:00 UTC
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure (non-Windows)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        shell: bash
+
+      - name: Build (non-Windows)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cmake --build build --config Release -- -j$(nproc)
+        shell: bash
+
+      - name: Configure (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        shell: pwsh
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cmake --build build --config Release
+        shell: pwsh
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmake-build-log-${{ matrix.os }}
+          path: build || .
