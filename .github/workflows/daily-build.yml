@@ -24,12 +24,17 @@ jobs:
 
       - name: Build (Windows)
         run: |
-          cmake --build build --config Release
+          # Run build with detailed verbosity and capture full output to a file
+          cmake --build build --config Release -- /verbosity:detailed > build\build.log 2>&1
+          $ExitCode = $LASTEXITCODE
+          if ($ExitCode -ne 0) { Write-Output "Build failed. See build\build.log"; exit $ExitCode }
         shell: pwsh
 
-      - name: Upload build artifact
+      - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cmake-build-log-windows
-          path: build
+          name: cmake-build-windows
+          path: |
+            build\build.log
+            build
