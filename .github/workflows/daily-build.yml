@@ -2,11 +2,11 @@ name: CI - Daily Build
 
 on:
   schedule:
-    - cron: '0 0 * * *' # daily at 00:00 UTC
+    - cron: "0 0 * * *" # daily at 00:00 UTC
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -24,10 +24,18 @@ jobs:
 
       - name: Build (Windows)
         run: |
-          # Run build with detailed verbosity and capture full output to a file
-          cmake --build build --config Release -- /verbosity:detailed > build\build.log 2>&1
-          $ExitCode = $LASTEXITCODE
-          if ($ExitCode -ne 0) { Write-Output "Build failed. See build\build.log"; exit $ExitCode }
+          # Ensure build directory exists
+          if (-not (Test-Path -Path build)) { New-Item -ItemType Directory -Path build | Out-Null }
+
+          # Run build with detailed verbosity and stream output to console and file
+          # Use Tee-Object so the log is written while output still appears in Actions console
+          cmake --build build --config Release -- /verbosity:detailed 2>&1 | Tee-Object -FilePath build\build.log
+
+          # Preserve and propagate exit code from the build tool
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "Build failed. See build\build.log"
+            exit $LASTEXITCODE
+          }
         shell: pwsh
 
       - name: Upload build artifacts
